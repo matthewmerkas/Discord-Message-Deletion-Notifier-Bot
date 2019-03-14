@@ -1,6 +1,11 @@
 import discord
 import asyncio
 import configparser
+from datetime import timedelta
+from datetime import time
+from datetime import date
+from pytz import timezone
+from tzlocal import get_localzone
 from discord.ext.commands import Bot
 
 """
@@ -14,7 +19,7 @@ config = configparser.ConfigParser(interpolation=None)
 config.read('config.ini')
 TOKEN = config['DEFAULT']['TOKEN']
 BOT_PREFIX = config['DEFAULT']['BOT_PREFIX']
-timezone = int(config['DEFAULT']['timezone'])
+loc_tz = int(config['DEFAULT']['timezone'])
 output = config['DEFAULT'].getboolean('output')
 command_delete = config['DEFAULT'].getboolean('output')
 status_delete = int(config['DEFAULT']['status_delete'])
@@ -79,10 +84,10 @@ async def on_message_delete(message):
 async def send_notification(message):
     channel = message.channel
     user = message.author.nick
-    utc = message.created_at
-    hour = (utc.hour + timezone) % 24
-    date = "{}-{}-{}".format(utc.day, utc.month, utc.year)
-    time = "{}:{}:{}".format(hour, utc.minute, utc.second)
-    await channel.send("Someone deleted {}'s message which was sent at {} on {}".format(user, time, date))
+    utc_dt = message.created_at
+    loc_dt = utc_dt + timedelta(hours=loc_tz)
+    dt = date(day=loc_dt.day, month=loc_dt.month, year=loc_dt.year).strftime("%d-%m-%y")
+    tm = time(hour=loc_dt.hour, minute=loc_dt.minute, second=loc_dt.second)
+    await channel.send("Someone deleted {}'s message which was sent at {} on {}".format(user, tm, dt))
 
 client.run(TOKEN)
