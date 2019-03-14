@@ -86,7 +86,7 @@ async def on_message_delete(message):
 async def send_notification(message):
     channel = message.channel
     if(message.author.nick == None):
-        user = str(message.author)[-5]
+        user = str(message.author)[:-5]
     else:
         user = message.author.nick
     utc_dt = message.created_at
