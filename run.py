@@ -36,6 +36,8 @@ async def on_ready():
 
 @client.command()
 async def help(context):
+    global context_memory
+    context_memory = context
     embed = discord.Embed(colour = discord.Colour.red())
     embed.set_author(name='Help')
     embed.add_field(name='on', value='Turn the message deletion notifications ON')
@@ -83,7 +85,10 @@ async def on_message_delete(message):
 
 async def send_notification(message):
     channel = message.channel
-    user = message.author.nick
+    if(message.author.nick == None):
+        user = message.author
+    else:
+        user = message.author.nick
     utc_dt = message.created_at
     loc_dt = utc_dt + timedelta(hours=loc_tz)
     dt = date(day=loc_dt.day, month=loc_dt.month, year=loc_dt.year).strftime("%d-%m-%y")
