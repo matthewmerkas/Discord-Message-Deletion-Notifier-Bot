@@ -25,6 +25,7 @@ commands_enabled = config['DEFAULT'].getboolean('commands_enabled')
 command_delete = config['DEFAULT'].getboolean('command_delete')
 status_delete = int(config['DEFAULT']['status_delete'])
 notification_message = ":warning: " + config['DEFAULT']['notification_message']
+bot_status = config['DEFAULT'].getboolean('bot_status')
 
 context_memory = None
 
@@ -33,7 +34,8 @@ client.remove_command('help')
 
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name='Notifications ON'))
+    if(bot_status):
+        await client.change_presence(activity=discord.Game(name='Notifications ON'))
 
 @client.command()
 async def help(context):
@@ -41,8 +43,11 @@ async def help(context):
     context_memory = context
     embed = discord.Embed(colour = discord.Colour.red())
     embed.set_author(name='Help')
-    embed.add_field(name='on', value='Turn the message deletion notifications ON')
-    embed.add_field(name='off', value='Turn the message deletion notifications OFF')
+    if(commands_enabled):
+        embed.add_field(name='on', value='Turn the message deletion notifications ON')
+        embed.add_field(name='off', value='Turn the message deletion notifications OFF')
+    else:
+        embed.add_field(name='Commands are currently disabled', value='Enable them in the config file')
     await context.send(embed=embed)
     if(command_delete):
         await context.message.delete()
@@ -55,7 +60,8 @@ async def on(context):
         global output
         output = True
         message = await context.send("Message deletion notifications ON")
-        await client.change_presence(activity=discord.Game(name='Notifications ON'))
+        if(bot_status):
+            await client.change_presence(activity=discord.Game(name='Notifications ON'))
         if(command_delete):
             await context.message.delete()
         if(status_delete > 0):
@@ -70,7 +76,8 @@ async def off(context):
         global output
         output = False
         message = await context.send("Message deletion notifications OFF")
-        await client.change_presence(activity=discord.Game(name='Notifications OFF'))
+        if(bot_status):
+            await client.change_presence(activity=discord.Game(name='Notifications OFF'))
         if(command_delete):
             await context.message.delete()
         if(status_delete > 0):
