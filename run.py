@@ -21,7 +21,8 @@ TOKEN = config['DEFAULT']['TOKEN']
 BOT_PREFIX = config['DEFAULT']['BOT_PREFIX']
 loc_tz = int(config['DEFAULT']['timezone'])
 output = config['DEFAULT'].getboolean('output')
-command_delete = config['DEFAULT'].getboolean('output')
+commands_enabled = config['DEFAULT'].getboolean('commands_enabled')
+command_delete = config['DEFAULT'].getboolean('command_delete')
 status_delete = int(config['DEFAULT']['status_delete'])
 notification_message = ":warning: " + config['DEFAULT']['notification_message']
 
@@ -48,31 +49,33 @@ async def help(context):
 
 @client.command()
 async def on(context):
-    global context_memory
-    context_memory = context
-    global output
-    output = True
-    message = await context.send("Message deletion notifications ON")
-    await client.change_presence(activity=discord.Game(name='Notifications ON'))
-    if(command_delete):
-        await context.message.delete()
-    if(status_delete > 0):
-        await asyncio.sleep(status_delete)
-        await message.delete()
+    if(commands_enabled):
+        global context_memory
+        context_memory = context
+        global output
+        output = True
+        message = await context.send("Message deletion notifications ON")
+        await client.change_presence(activity=discord.Game(name='Notifications ON'))
+        if(command_delete):
+            await context.message.delete()
+        if(status_delete > 0):
+            await asyncio.sleep(status_delete)
+            await message.delete()
 
 @client.command()
 async def off(context):
-    global context_memory
-    context_memory = context
-    global output
-    output = False
-    message = await context.send("Message deletion notifications OFF")
-    await client.change_presence(activity=discord.Game(name='Notifications OFF'))
-    if(command_delete):
-        await context.message.delete()
-    if(status_delete > 0):
-        await asyncio.sleep(status_delete)
-        await message.delete()
+    if(commands_enabled):
+        global context_memory
+        context_memory = context
+        global output
+        output = False
+        message = await context.send("Message deletion notifications OFF")
+        await client.change_presence(activity=discord.Game(name='Notifications OFF'))
+        if(command_delete):
+            await context.message.delete()
+        if(status_delete > 0):
+            await asyncio.sleep(status_delete)
+            await message.delete()
 
 @client.event
 async def on_message_delete(message):
