@@ -23,8 +23,8 @@ loc_tz = int(config['DEFAULT']['timezone'])
 output = config['DEFAULT'].getboolean('output')
 command_delete = config['DEFAULT'].getboolean('output')
 status_delete = int(config['DEFAULT']['status_delete'])
+notification_message = ":warning: " + config['DEFAULT']['notification_message']
 
-global context_memory
 context_memory = None
 
 client = Bot(command_prefix=BOT_PREFIX)
@@ -76,23 +76,25 @@ async def off(context):
 
 @client.event
 async def on_message_delete(message):
+    #Check if someone's trying to delete a user's message and send a notification
     if(context_memory == None):
         if(message.author != client.user) and (output):
             await send_notification(message)
     else:
         if(message.author != client.user) and (message != context_memory.message) and (output):
             await send_notification(message)
+    #Check if someone's trying to delete a notification and repost it
+    if(message.author == client.user) and (message.content[:10] == ":warning: "):
+        await message.channel.send(message.content)
 
 async def send_notification(message):
-    channel = message.channel
-    if(message.author.nick == None):
-        user = str(message.author)[:-5]
-    else:
-        user = message.author.nick
+    user = message.author.display_name
+    #Timezone stuff
     utc_dt = message.created_at
     loc_dt = utc_dt + timedelta(hours=loc_tz)
     dt = date(day=loc_dt.day, month=loc_dt.month, year=loc_dt.year).strftime("%d-%m-%y")
     tm = time(hour=loc_dt.hour, minute=loc_dt.minute, second=loc_dt.second)
-    await channel.send("Someone deleted {}'s message which was sent at {} on {}".format(user, tm, dt))
+
+    await message.channel.send(notification_message.format(user=user, time=tm, date=dt))
 
 client.run(TOKEN)
