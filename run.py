@@ -87,11 +87,11 @@ async def off(context):
 @client.event
 async def on_message_delete(message):
     #Check if someone's trying to delete a user's message and send a notification
-    if(context_memory == None):
-        if(message.author != client.user) and (output):
+    if(context_memory == None) and (output) and not (message.author.bot):
+        if(message.author != client.user):
             await send_notification(message)
     else:
-        if(message.author != client.user) and (message != context_memory.message) and (output) and not (message.author.bot):
+        if(message.author != client.user) and (message != context_memory.message):
             await send_notification(message)
     #Check if someone's trying to delete a notification and repost it
     if(message.author == client.user) and (message.content[:10] == ":warning: "):
