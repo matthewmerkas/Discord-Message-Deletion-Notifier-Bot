@@ -91,7 +91,7 @@ async def on_message_delete(message):
         if(message.author != client.user) and (output):
             await send_notification(message)
     else:
-        if(message.author != client.user) and (message != context_memory.message) and (output):
+        if(message.author != client.user) and (message != context_memory.message) and (output) and not (message.author.bot):
             await send_notification(message)
     #Check if someone's trying to delete a notification and repost it
     if(message.author == client.user) and (message.content[:10] == ":warning: "):
